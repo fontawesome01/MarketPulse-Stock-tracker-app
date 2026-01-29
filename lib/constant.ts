@@ -55,11 +55,14 @@ export const MARKET_OVERVIEW_WIDGET_CONFIG = {
     symbolActiveColor: 'rgba(15, 237, 190, 0.05)', // highlight color for active symbol
     tabs: [
         {
-            title: 'Indian Indices',
+            title: 'Financial',
             symbols: [
-                { s: 'NSE:NIFTY', d: 'NIFTY 50' },
-                { s: 'NSE:BANKNIFTY', d: 'Bank Nifty' },
-                { s: 'NSE:FINNIFTY', d: 'Fin Nifty' },
+                { s: 'NYSE:JPM', d: 'JPMorgan Chase' },
+                { s: 'NYSE:WFC', d: 'Wells Fargo Co New' },
+                { s: 'NYSE:BAC', d: 'Bank Amer Corp' },
+                { s: 'NYSE:HSBC', d: 'Hsbc Hldgs Plc' },
+                { s: 'NYSE:C', d: 'Citigroup Inc' },
+                { s: 'NYSE:MA', d: 'Mastercard Incorporated' },
             ],
         },
         {
@@ -102,7 +105,7 @@ export const HEATMAP_WIDGET_CONFIG = {
     symbolUrl: '',
     colorTheme: 'dark',
     exchanges: [],
-    hasTopBar: false,
+    hasTopBar: true,
     isDataSetEnabled: false,
     isZoomEnabled: true,
     hasSymbolTooltip: true,
