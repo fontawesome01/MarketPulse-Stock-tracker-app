@@ -13,16 +13,22 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LogOut } from "lucide-react"
 import Navitems from "@/components/Navitems"
 import { useIsMobile } from "@/lib/useIsMobile"
+import { signOut } from "@/lib/actions/auth-actions";
 
-const Userdropdown = () => {
+
+const Userdropdown = ({user} : {user: user}) => {
     const router = useRouter()
     const isMobile = useIsMobile()
 
     const HandleSignOut = async () => {
-        router.push("/SignOut")
-    }
+        const res = await signOut();
+        if (res?.success) {
+            router.push("/signIn");
+        }
+    };
 
-    const user = { name: "Harsh", email: "harshrajput20030101@gmail.com" }
+
+
 
     return (
         <DropdownMenu>
@@ -76,7 +82,7 @@ const Userdropdown = () => {
                     <>
                         <DropdownMenuSeparator className="bg-gray-600" />
                         <nav>
-                            <Navitems />
+                            <Navitems/>
                         </nav>
                     </>
                 )}

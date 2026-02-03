@@ -1,13 +1,13 @@
-
 'use client';
 
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import Inputfield from '@/components/forms/Inputfield';
-import Footerlink from '@/components/forms/Footerlink';
-//import {signInWithEmail, signUpWithEmail} from "@/lib/actions/auth.actions";
-//import {toast} from "sonner";
-//import {signInEmail} from "better-auth/api";
+import InputField from '@/components/forms/Inputfield';
+import FooterLink from '@/components/forms/Footerlink';
+import {signInWithEmail, signUpWithEmail} from "@/lib/actions/auth-actions";
+import {toast} from "sonner";
+import {signInEmail} from "better-auth/api";
+
 import {useRouter} from "next/navigation";
 
 const SignIn = () => {
@@ -24,40 +24,40 @@ const SignIn = () => {
         mode: 'onBlur',
     });
 
-    // const onSubmit = async (data: SignInFormData) => {
-    //     try {
-    //         const result = await signInWithEmail(data);
-    //         if(result.success) router.push('/');
-    //     } catch (e) {
-    //         console.error(e);
-    //         toast.error('Sign in failed', {
-    //             description: e instanceof Error ? e.message : 'Failed to sign in.'
-    //         })
-    //     }
-    // }
     const onSubmit = async (data: SignInFormData) => {
         try {
-            console.log(data);
-        }catch(err) {
-            console.log(err);
+            const result = await signInWithEmail(data);
+            if (!result.success) {
+                toast.error("Sign in failed", {
+                    description: result.error ?? "Invalid email or password",
+                });
+                return;
+            }
+
+            router.push("/");
+        } catch (e) {
+            console.error(e);
+            toast.error("Unexpected error", {
+                description: "Something went wrong. Please try again.",
+            });
         }
-    }
+    };
 
     return (
         <>
             <h1 className="form-title">Welcome back</h1>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                <Inputfield
+                <InputField
                     name="email"
                     label="Email"
-                    placeholder="Harshrajput20030101@gmail.com"
+                    placeholder="contact@jsmastery.com"
                     register={register}
                     error={errors.email}
                     validation={{ required: 'Email is required', pattern: /^\w+@\w+\.\w+$/ }}
                 />
 
-                <Inputfield
+                <InputField
                     name="password"
                     label="Password"
                     placeholder="Enter your password"
@@ -71,7 +71,7 @@ const SignIn = () => {
                     {isSubmitting ? 'Signing In' : 'Sign In'}
                 </Button>
 
-                <Footerlink text="Don't have an account?" linkText="Create an account" href="/signUp" />
+                <FooterLink text="Don't have an account?" linkText="Create an account" href="/signUp" />
             </form>
         </>
     );

@@ -67,7 +67,7 @@ declare global {
         intro: string;
     };
 
-    type User = {
+    type user = {
         id: string;
         name: string;
         email: string;
