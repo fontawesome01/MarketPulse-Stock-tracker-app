@@ -54,26 +54,8 @@ export const sendDailyNewsSummary = inngest.createFunction(
     [
         // This function can be triggered either by an app event or on a daily schedule.
         { event: 'app/send.daily.news' },
-        // Cron expression explained: '0 12 * * *'
-        //   ┌─ minute (0)
-        //   │  ┌─ hour (12)
-        //   │  │  ┌─ day of month (*)
-        //   │  │  │  ┌─ month (*)
-        //   │  │  │  │  ┌─ day of week (*)
-        //   0  12 *  *  *
-        // Meaning: Run every day at 12:00 (noon) UTC.
-        // Note: Inngest schedules run in UTC by default. To use a specific timezone, you can provide:
-        //   { cron: '0 12 * * *', timezone: 'America/New_York' }
-        // Run every day at 12:00 (noon) UTC
-        //{ cron: '0 12 * * *' },
-        // TEMP: One-off run ~5 minutes from user's local time
-        // User timezone: Asia/Kolkata (IST)
-        // Current local time: 2026-02-05 15:03 IST
-        // Original intent was 15:08 IST; adjusting to the next near-term run for verification.
-        // Current local time ~ 2026-02-05 15:42 IST; schedule a one-off at 15:47 IST today for testing.
-        // Note: This cron will recur annually on the same month/day/hour/minute.
-        // Remove this entry after it fires, or adjust to your desired timing.
-        { cron: '30 16 * * *', timezone: 'Asia/Kolkata' }
+        // Run every day at 12:00 (noon) UTCs
+        { cron: '25 9 * * *', timezone: 'Asia/Kolkata' }
     ],
     async ({ step }) => {
         // Step 1: get all users for news delivery
@@ -122,16 +104,18 @@ export const sendDailyNewsSummary = inngest.createFunction(
             newsContent: string | null;
         }[] = [];
 
-        for (const { user, articles } of perUser as Array<{
+        const perUserArr = perUser as Array<{
             user: { id?: string; email: string; name?: string };
             articles: MarketNewsArticle[];
-        }>) {
+        }>;
+        for (let i = 0; i < perUserArr.length; i++) {
+            const { user, articles } = perUserArr[i];
             try {
                 const prompt = NEWS_SUMMARY_EMAIL_PROMPT.replace(
                     '{{newsData}}',
                     JSON.stringify(articles ?? [], null, 2)
                 );
-                const response = await step.ai.infer(`summarize-news-${user.email}`, {
+                const response = await step.ai.infer(`summarize-news-${user.id ?? i}`, {
                     model: step.ai.models.gemini({ model: 'gemini-2.5-flash-lite' }),
                     body: {
                         contents: [{ role: 'user', parts: [{ text: prompt }] }],

@@ -13,11 +13,11 @@ export const formatTimeAgo = (timestamp: number) => {
 
     if (diffInHours > 24) {
         const days = Math.floor(diffInHours / 24);
-        return `${days} day${days > 1 ? 's' : ''} ago`;
+        return `${days} day${days !== 1 ? 's' : ''} ago`;
     } else if (diffInHours >= 1) {
-        return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+        return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
     } else {
-        return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+        return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
     }
 };
 
@@ -32,7 +32,13 @@ export function formatMarketCapValue(marketCapUsd: number): string {
     if (marketCapUsd >= 1e12) return `$${(marketCapUsd / 1e12).toFixed(2)}T`; // Trillions
     if (marketCapUsd >= 1e9) return `$${(marketCapUsd / 1e9).toFixed(2)}B`; // Billions
     if (marketCapUsd >= 1e6) return `$${(marketCapUsd / 1e6).toFixed(2)}M`; // Millions
-    return `$${marketCapUsd.toFixed(2)}`; // Below one million, show full USD amount
+    // Below one million, show full USD amount with thousand separators
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(marketCapUsd);
 }
 
 export const getDateRange = (days: number) => {
@@ -74,7 +80,7 @@ export const calculateNewsDistribution = (symbolsCount: number) => {
 
 // Check for required article fields
 export const validateArticle = (article: RawNewsArticle) =>
-    article.headline && article.summary && article.url && article.datetime;
+    article.headline && article.summary && article.url && article.datetime != null;
 
 // Get today's date string in YYYY-MM-DD format
 export const getTodayString = () => new Date().toISOString().split('T')[0];
@@ -85,7 +91,7 @@ export const formatArticle = (
     symbol?: string,
     index: number = 0
 ) => ({
-    id: isCompanyNews ? Date.now() + Math.random() : article.id + index,
+    id: isCompanyNews ? (globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : `${article.id || 'company'}-${index}-${Math.random().toString(36).slice(2)}`) : article.id + index,
     headline: article.headline!.trim(),
     summary:
         article.summary!.trim().substring(0, isCompanyNews ? 200 : 150) + '...',
@@ -94,7 +100,8 @@ export const formatArticle = (
     datetime: article.datetime!,
     image: article.image || '',
     category: isCompanyNews ? 'company' : article.category || 'general',
-    related: isCompanyNews ? symbol! : article.related || '',
+    // If company news but symbol is missing, fall back safely
+    related: isCompanyNews ? (symbol ?? article.related ?? '') : article.related || '',
 });
 
 export const formatChangePercent = (changePercent?: number) => {

@@ -3,7 +3,8 @@
 import { getDateRange, validateArticle, formatArticle } from '@/lib/utils';
 
 const FINNHUB_BASE_URL = 'https://finnhub.io/api/v1';
-const NEXT_PUBLIC_FINNHUB_API_KEY = process.env.NEXT_PUBLIC_FINNHUB_API_KEY || '';
+// Server-only API key; do not expose via NEXT_PUBLIC
+const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY || '';
 
 async function fetchJSON<T>(url: string, revalidateSeconds?: number): Promise<T> {
     const res = await fetch(url, revalidateSeconds
@@ -23,7 +24,7 @@ export async function getNews(symbols?: string[]): Promise<MarketNewsArticle[]> 
     try {
         const { from, to } = getDateRange(5);
 
-        const tokenParam = `token=${encodeURIComponent(NEXT_PUBLIC_FINNHUB_API_KEY)}`;
+        const tokenParam = `token=${encodeURIComponent(FINNHUB_API_KEY)}`;
 
         const cleanSymbols = (symbols || [])
             .map((s) => s?.trim().toUpperCase())
@@ -103,13 +104,14 @@ export async function getNews(symbols?: string[]): Promise<MarketNewsArticle[]> 
         }
 
         // General market news
-        const generalUrl = `${FINNHUB_BASE_URL}/news?category=general&${tokenParam}`;
+        const generalUrl = `${FINNHUB_BASE_URL}/news?category=commodity&${tokenParam}`;
         const general = await fetchJSON<RawNewsArticle[]>(generalUrl, 300);
         const results: MarketNewsArticle[] = [];
 
         for (let i = 0; i < (general?.length || 0) && results.length < maxArticles; i++) {
             const art = general[i];
-            addIfValid(results, art, false);
+            // Ensure proper index is passed so formatted articles get unique indices
+            addIfValid(results, art, false, undefined, i);
         }
 
         // Sort by datetime desc and return top 6

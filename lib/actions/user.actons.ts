@@ -47,12 +47,21 @@ export const getAllusersforNewsEmail = async () => {
             }
         }
 
-        // If still none, at least attempt the default 'users' without existence check
+        // If still none, at least attempt the default 'users' with an email filter
         if (!chosenCollection) {
             try {
                 const fallback = await db
                     .collection('users')
-                    .find({}, { projection: { _id: 1, id: 1, email: 1, name: 1, country: 1, emails: 1, profile: 1 } })
+                    .find(
+                        {
+                            $or: [
+                                { email: { $exists: true, $ne: null } },
+                                { 'emails.0.email': { $exists: true, $ne: null } },
+                                { 'profile.email': { $exists: true, $ne: null } },
+                            ],
+                        },
+                        { projection: { _id: 1, id: 1, email: 1, name: 1, country: 1, emails: 1, profile: 1 } }
+                    )
                     .toArray();
                 if (Array.isArray(fallback) && fallback.length > 0) {
                     chosenCollection = 'users';
