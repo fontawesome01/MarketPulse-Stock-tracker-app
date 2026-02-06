@@ -153,7 +153,7 @@ declare global {
     };
 
     type MarketNewsArticle = {
-        id: number;
+        id: string | number;
         headline: string;
         summary: string;
         source: string;
